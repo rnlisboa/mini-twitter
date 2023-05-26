@@ -13,7 +13,7 @@ class ProfileUserModel(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
-class UserPost(models.Model):
+class UserPostModel(models.Model):
     twitt = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     photo = models.ImageField(

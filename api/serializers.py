@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-
+from .models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -8,10 +8,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProfileUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = m.ProfileUserModel
+        model = ProfileUserModel
         fields = '__all__'
 
 class UserPostSerializer(serializers.ModelSerializer):
     class Meta:
-        model = m.UserPostModel
+        model = UserPostModel
         fields = '__all__'
