@@ -98,3 +98,29 @@ class ProfileUserViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         return Response('Perfil criado com sucesso', status=status.HTTP_201_CREATED)
+    
+
+class UserPostViewSet(viewsets.ModelViewSet):
+    queryset = UserPostModel.objects.all()
+    serializer_class = UserPostSerializer()
+
+    @action(detail=False, methods=['get'])
+    def get_my_posts(self, *args, **kwargs):
+        user_id = self.request.query_params.get('user_id', None)
+
+        try:
+            posts = self.queryset.filter(user=user_id)
+        except Exception as e:
+            return Response(data={
+                "message":"Não há publicações para este usuário.",
+                "error": f"{e}"
+            }, status=status.HTTP_400_BAD_REQUEST) 
+        
+        serializer = serializer_class(posts, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'])
+    def get_posts(self, *args, **kwargs):
+        serializer = serializer_class(queryset, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        
