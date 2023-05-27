@@ -48,3 +48,53 @@ class UserViewSet(viewsets.ModelViewSet):
             "message": "Houveram erros de validação",
             "errors": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProfileUserViewSet(viewsets.ModelViewSet):
+    queryset = ProfileUserModel.objects.all()
+    serializer_class = ProfileUserSerializer
+    
+    @action(detail=False, methods=['get'])
+    def get_profile(self, *args, **kwargs):
+        user_id = self.request.query_params.get('user_id', None)
+
+        if not user_id:
+            return Response(data="Erro ao buscar usuário", status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user_profile = self.queryset.get(user=user_id)
+        except Exception as e:
+            return Response(data={
+                "message":"Perfil de usuário não encontrado.",
+                "error": f"{e}"
+            }, status=status.HTTP_400_BAD_REQUEST) 
+        
+        serializer = self.serializer_class(user_profile)
+        
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'])
+    def register_profile(self, *args, **kwargs):
+        req = self.request.data
+
+        user_id = req['user_id'] if 'user_id' in req else None
+        if not user_id:
+            return Response(data="Erro ao buscar usuário", status=status.HTTP_400_BAD_REQUEST)
+        
+        user = User.objects.get(pk=user_id)
+        
+        profile_image = req['profile_image'] if 'profile_image' in req else None
+
+        try:
+            new_profile = ProfileUserModel(
+                photo=profile_image,
+                user = user
+            )
+            new_profile.save()
+
+        except Exception as e:
+            return Response(data={
+                'message': 'Erro ao adicionar ao criar perfil',
+                'error': f"{e}"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response('Perfil criado com sucesso', status=status.HTTP_201_CREATED)
