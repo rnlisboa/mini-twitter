@@ -6,6 +6,7 @@ from rest_framework                             import status, viewsets
 from rest_framework.permissions                 import IsAuthenticated
 from rest_framework_simplejwt.authentication    import JWTAuthentication
 from django.contrib.auth.models import User
+from django.db.models import Q
 from .serializers import *
 from .models import *
 # Create your views here.
@@ -132,7 +133,7 @@ class ProfileUserViewSet(viewsets.ModelViewSet):
 
 class UserPostViewSet(viewsets.ModelViewSet):
     queryset = UserPostModel.objects.all()
-    serializer_class = UserPostSerializer()
+    serializer_class = UserPostSerializer
 
     @action(detail=False, methods=['get'])
     def get_my_posts(self, *args, **kwargs):
@@ -150,17 +151,47 @@ class UserPostViewSet(viewsets.ModelViewSet):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['get'])
-    def get_posts(self, *args, **kwargs):
-        serializer = serializer_class(self.queryset, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
-    
-    @action(detail=False, methods=['get'])
     def get_followers_posts(self, *args, **kwargs):
         user_id = self.request.query_params.get('user_id', None)
-             
-        user = User.objects.get(pk=user_id)
-        followers = FollowModel.objects.filter(user=user_id)
-        
-        
-        return Response(data="serializer.data", status=status.HTTP_200_OK)
+
+        try:
+            following_ids = FollowModel.objects.filter(user=user_id).values_list('following', flat=True)
+
+            posts = self.queryset.filter(Q(user__in=following_ids)).exclude(user=user_id)
+
+            serializer = self.serializer_class(posts, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(data={
+                "message": "Erro ao obter os posts dos seguidores",
+                "error": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
     
+    @action(detail=False, methods=['post'])
+    def register_publication(self, *args, **kwargs):
+        req = self.request.data
+        user_id = req['user_id'] if 'user_id' in req else None 
+        user = User.objects.get(pk=user_id)
+        
+        twitt = req['twitt'] if 'twitt' in req else None
+        photo = req['photo'] if 'photo' in req else None
+
+        if not (twitt and photo):
+            return  Response(data="Não é possível publicações vazias.", status=status.HTTP_400_BAD_REQUEST)  
+
+        try:
+            publi = UserPostModel(
+                user=user,
+                photo=photo,
+                twitt=twitt
+            )   
+
+            publi.save()
+            serializer = self.serializer_class(publi)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(data={
+                "message": "Erro ao publicar",
+                "error": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
