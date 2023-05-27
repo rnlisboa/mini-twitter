@@ -4,13 +4,17 @@ from rest_framework.response                    import Response
 from rest_framework.decorators                  import action
 from rest_framework                             import status, viewsets
 from rest_framework.permissions                 import IsAuthenticated
+from rest_framework.pagination                  import PageNumberPagination
 from rest_framework_simplejwt.authentication    import JWTAuthentication
-from django.contrib.auth.models import User
-from django.db.models import Q
-from .serializers import *
-from .models import *
-# Create your views here.
+from django.contrib.auth.models                 import User
+from django.db.models                           import Q
+from .serializers                               import *
+from .models                                    import *
 
+class Pagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 10000
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -134,7 +138,8 @@ class ProfileUserViewSet(viewsets.ModelViewSet):
 class UserPostViewSet(viewsets.ModelViewSet):
     queryset = UserPostModel.objects.all()
     serializer_class = UserPostSerializer
-
+    pagination_class = Pagination
+    
     @action(detail=False, methods=['get'])
     def get_my_posts(self, *args, **kwargs):
         user_id = self.request.query_params.get('user_id', None)
@@ -147,6 +152,11 @@ class UserPostViewSet(viewsets.ModelViewSet):
                 "error": f"{e}"
             }, status=status.HTTP_400_BAD_REQUEST) 
         
+        page = self.paginate_queryset(posts)
+        if page is not None:
+            serializer = self.serializer_class(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = serializer_class(posts, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     
@@ -158,6 +168,11 @@ class UserPostViewSet(viewsets.ModelViewSet):
             following_ids = FollowModel.objects.filter(user=user_id).values_list('following', flat=True)
 
             posts = self.queryset.filter(Q(user__in=following_ids)).exclude(user=user_id)
+            
+            page = self.paginate_queryset(posts)
+            if page is not None:
+                serializer = self.serializer_class(page, many=True)
+                return self.get_paginated_response(serializer.data)
 
             serializer = self.serializer_class(posts, many=True)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
