@@ -99,6 +99,36 @@ class ProfileUserViewSet(viewsets.ModelViewSet):
 
         return Response('Perfil criado com sucesso', status=status.HTTP_201_CREATED)
     
+    @action(detail=False, methods=['post'])
+    def add_follower(self, *args, **kwargs):
+        req = self.request.data
+
+        user_id = req['user_id'] if 'user_id' in req else None 
+        follower_id = req['follower_id'] if 'follower_id' in req else None
+
+        if not user_id or not follower_id:
+            return Response(data="Erro ao buscar usuário ou seguidor", status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(pk=user_id)
+            user_to_follow_instace = User.objects.get(pk=follower_id)
+
+            existing_follow = FollowModel.objects.filter(user=user, following=user_to_follow_instace).exists()
+            if existing_follow:
+                return Response(data="Você já está seguindo o usuário", status=status.HTTP_400_BAD_REQUEST)
+
+            follow = FollowModel(user=user, following=user_to_follow_instace)
+            follow.save()
+            return Response(data="Seguidor adicionado com sucesso", status=status.HTTP_201_CREATED)
+
+        except ProfileUserModel.DoesNotExist:
+            return Response(data="Perfil de usuário não encontrado", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(data={
+                'message': 'Erro ao adicionar seguidor',
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserPostViewSet(viewsets.ModelViewSet):
     queryset = UserPostModel.objects.all()
@@ -121,6 +151,16 @@ class UserPostViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def get_posts(self, *args, **kwargs):
-        serializer = serializer_class(queryset, many=True)
+        serializer = serializer_class(self.queryset, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'])
+    def get_followers_posts(self, *args, **kwargs):
+        user_id = self.request.query_params.get('user_id', None)
+             
+        user = User.objects.get(pk=user_id)
+        followers = FollowModel.objects.filter(user=user_id)
         
+        
+        return Response(data="serializer.data", status=status.HTTP_200_OK)
+    

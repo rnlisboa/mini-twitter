@@ -24,10 +24,10 @@ class UserPostModel(models.Model):
     )
 
 class FollowModel(models.Model):
-    follower = models.ForeignKey(
-        ProfileUserModel, on_delete=models.CASCADE, related_name='followers'
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE
     )
     following = models.ForeignKey(
-        ProfileUserModel, on_delete=models.CASCADE, related_name='following'
+        User, on_delete=models.CASCADE, related_name='following'
     )
     created_at = models.DateTimeField(auto_now_add=True)
