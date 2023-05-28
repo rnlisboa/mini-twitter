@@ -1,6 +1,49 @@
 # mini-twitter
 Mini-twitter é um projeto que consiste em um minissistema que implementa, em python, algumas das funcionalidades principais do Twitter.
 
+# guia de instalação do projeto
+
+# Docker
+```sh
+docker-compose up -d
+```
+
+## Windows
+1. Faça download do projeto
+2. No diretório do projeto digite os comandos:
+```sh 
+python -m venv venv
+```
+
+```sh 
+.\venv\scripts\activate
+```
+
+```sh 
+pip install -r requirements.txt
+```
+```sh 
+python manage.py runserver 
+```
+
+
+## Linux/MacOs
+1. Faça download do projeto
+2. No diretório do projeto digite os comandos:
+
+```sh 
+python3 -m venv venv
+```
+```sh 
+source venv/bin/activate
+```
+```sh 
+pip install -r requirements.txt
+```
+```sh 
+python3 manage.py runserver
+```
+
 
 # Documentação da API
 ## User
