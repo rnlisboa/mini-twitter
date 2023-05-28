@@ -262,7 +262,50 @@ python3 manage.py runserver
 
 </pre>
 
-### Obter Posts dos Seguidores
+
+### Obter Feed Geral
+#### Recupera as publicações dos usuários.
+
+#### URL: api/posts/
+
+#### Método: GET
+
+#### Resposta:
+
+<pre>
+[
+    {
+        "id": 1,
+        "user": {
+            "id": 2,
+            "username": "jane.doe",
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@example.com"
+        },
+        "twitt": "Postagem da Jane",
+        "created_at": "2023-05-24T12:00:00Z",
+        "photo": "http://example.com/caminho/para/foto3.jpg"
+    },
+    {
+        "id": 2,
+        "user": {
+            "id": 3,
+            "username": "novousuario",
+            "first_name": "Novo",
+            "last_name": "Usuário",
+            "email": "novousuario@example.com"
+        },
+        "twitt": "Postagem do Novo Usuário",
+        "created_at": "2023-05-25T12:00:00Z",
+        "photo": "http://example.com/caminho/para/foto4.jpg"
+    },
+    ...
+]
+
+</pre>
+
+### Obter Feed Personalizado
 #### Recupera as publicações dos usuários seguidos por um usuário.
 
 #### URL: api/posts/get_followers_posts/?user_id=id
