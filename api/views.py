@@ -141,7 +141,7 @@ class UserPostViewSet(viewsets.ModelViewSet):
         user_id = self.request.query_params.get('user_id', None)
 
         try:
-            posts = self.queryset.filter(user=user_id)
+            posts = self.queryset.filter(user=user_id).order_by('-id')
         except Exception as e:
             return Response(data={
                 "message":"Não há publicações para este usuário.",
@@ -163,7 +163,7 @@ class UserPostViewSet(viewsets.ModelViewSet):
         try:
             following_ids = FollowModel.objects.filter(user=user_id).values_list('following', flat=True)
 
-            posts = self.queryset.filter(Q(user__in=following_ids)).exclude(user=user_id)
+            posts = self.queryset.filter(Q(user__in=following_ids)).exclude(user=user_id).order_by('-id')
             
             page = self.paginate_queryset(posts)
             if page is not None:
