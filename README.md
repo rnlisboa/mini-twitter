@@ -4,6 +4,8 @@ Mini-twitter é um projeto que consiste em um minissistema que implementa, em py
 # guia de instalação do projeto
 
 # Docker
+1. Faça download do projeto
+2. No diretório do projeto digite o comando:
 ```sh
 docker-compose up -d
 ```
