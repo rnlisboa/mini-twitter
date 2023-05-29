@@ -45,7 +45,10 @@ pip install -r requirements.txt
 ```sh 
 python3 manage.py runserver
 ```
-
+# Credenciais de super usuário
+1. username: admin
+2. email: admin@gmail.com
+3. password: 123
 
 # Documentação da API
 ## User
