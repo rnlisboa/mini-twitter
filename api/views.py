@@ -124,12 +124,6 @@ class ProfileUserViewSet(viewsets.ModelViewSet):
 
         except ProfileUserModel.DoesNotExist:
             return Response(data="Perfil de usuário não encontrado", status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response(data={
-                'message': 'Erro ao adicionar seguidor',
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
-
 
 class UserPostViewSet(viewsets.ModelViewSet):
     queryset = UserPostModel.objects.all()
